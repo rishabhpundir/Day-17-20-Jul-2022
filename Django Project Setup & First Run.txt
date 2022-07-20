@@ -1,0 +1,109 @@
+DJANGO PROJECT SETUP
+
+1. Open terminal in a suitable folder and run : 
+django-admin startproject ProjectNameInCamelCase 
+It will create the "top-level" project folder and a "project settings" folder inside that top-level project folder. Both will have same name.
+
+
+2. Inside the project folder open terminal again and run : 
+python manage.py startapp AppName
+This will create an App folder on same level as project settings folder.
+
+
+3. Create folders 'static' and 'templates' inside project folder on same level as App Folder & project settings folder.
+
+
+4. Go to project folder > project settings folder > open settings.py file > type at top : 
+import os 
+Then go down & find TEMPLATES []. In it, mention recently created 'templates' folder in 'directories path' so Django knows where to look for HTML templates when we create them :
+'DIRS': [os.path.join(BASE_DIR, 'templates')]
+
+Then, scroll down to the last where STATIC_URL is. Under it type : 
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')] 
+This is to tell the project where to find the static files (images, js files etc).
+
+Save changes to settings.py and close.
+
+
+5. Run at terminal inside top-level project folder:
+python manage.py runserver
+This will start the Django development server and you will see a rocket. This is just to check everything is working fine.
+
+
+6.  Go to project folder > project settings folder > open urls.py file > Type 'include' alongside 'path' like this :
+from django.urls import path, include
+this is to redirect project to include urls that will be created for the HTML pages later on. To actually include the App urls type inside urlpatterns :
+urlpatterns = [
+    path('admin/', admin.site.urls),
+    path('', include('AppName.urls'))
+]
+This way we set our App urls to be included when we run the server. The '' is to set a default prefix in the website url through which all the pages will be served. example : xyz.com/defaultName/page1, xyz.com/defaultName/page2, ...., xyz.com/defaultName/page234342 --> where 'defaultName' is the word included in the ''. Leave it blank to keep things simple.
+
+This file will be edited once like this to include every Html page url of App folder and thats it, although you may open it in next steps to understand how stuff works.
+
+Select the code under Doc Strings comment ("""like this one""") and copy it for next step. Then save file, but don't close it.
+
+
+7. Go to project folder > App folder > CREATE A NEW 'urls.py' FILE > Paste stuff you copied from the OTHER 'urls.py' from project settings folder into this new 'urls.py' inside App folder. Yes, its gonna get fucked up level complex now but follow on. 
+
+Paste the copied code. Now we will edit it, first the imports, like this :
+from django.urls import path
+from ToDoListApp import views
+I don't need the 'include' OR 'admin' class as it is only required in the project settings for 'urls' to create a default admin page for the applications, while this is App settings inside its own 'urls.py' for 'AppName.urls', which was mentioned inside 'urlpatterns' in the Project settings folder's 'url.py'. Basically, now I am defining what will happen afterwards when 'AppName.urls' is triggered by the server in the project settings's 'urls.py', through App's own 'urls.py'.
+
+go inside the urlpatterns and delete admin path. As I said, I don't need it here. After that, edit the next path like this :
+urlpatterns = [
+    path('', views.FunctionName, name='FunctionName')
+]
+
+Save file and notice the diffrences between the two 'urls.py'. We use 'name' here to define the path name that will be included in project settings's 'urls.py'.
+
+8. Go to project folder > App folder > open views.py file > type/add this :
+from django.shortcuts import render, HttpResponse
+
+# Create your views here.
+
+def FunctionName(request):
+    return HttpResponse('This Page is working now.')
+Save changes.
+'views.py', as name suggests, is responsible for what we view inside our browser AKA the html pages. To load those 'views', we define methods here to setup the way we want the pages to interact with the database on the server.
+
+Here, the 'HttpResponse' is added as make the page work without an actual HTML page included. It won't be used in the future, just for demo purposes & to check if everything is working fine. We will use 'render' for actual html pages in future.
+
+Next is a FunctionName() method. This is basically the "HTML page loader" bullet inside your "django url server" gun. Whatever page we include in a function/method defined inside App's 'views.py' will be forwarded to App's 'urls.py' through path which in turn will be forwarded to Project settings folder's 'urls.py' and then finally, that page is loaded inside the browser by Django Server. 
+
+Again, Here's a the flow of urls & functions:
+
+HTML page created & stored in templates ==> 
+That page is included inside a Function() in views.py ==> 
+views.Function is included inside the path of App's urls.py ==> 
+App's urls are included inside Project settings folder's 'urls.py' ==> 
+Server accesses the HTML page through all the linked paths & displays it inside the browser ==> Your eyes.
+
+To ease the confusion, I would recommend open both 'urls.py' files side by side along with views.py in the order above to understand & visualise their working.
+
+
+9. Run : 
+python manage.py runserver
+Browser will say : 
+This Page is working now.
+
+10. To load an actual HTML page, create one with just a message inside h1 heading and store it in the 'templates' folder. Inside 'views.py', do this :
+from django.shortcuts import render
+
+# Create your views here.
+
+def FunctionName(request):
+    return render(request, 'HtmlPageYouJustCreated.html')
+
+Save 'views.py' & reload the browser page. You will see your message as the page gas been loaded. You may think how does Django know where the page is inside the PC storage. It can because Magic! and also because of Step 4 above.
+
+Another query will be, Why the fuck do we need so many steps, like "page > function > views.py > urls.py > urls.py 2 > server > brower > you" just to load a simple HTML page? 
+
+Answer : It is to done to reduce the chances of websites breaking as they grow bigger and complex with time with so many pages and databases to keep track of. The chance that even a single bad entry in the code will break the website becomes high. So,  DJANGO has so many "independent of each other" steps inbetween precisely to create a barrier between the content (HTML Page), what content is served when (views) and how it is served (urls to server control). Each step can be edited independent of the other two without any real affect on the final product AKA what you see on the broswer.
+Also, Django reduces repetetive code that is common between all the html pages by a vast margin. You'll see soon & you're gonna love it.
+
+
+
+
+
